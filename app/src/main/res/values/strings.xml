@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AbdelRhman_Hamdy_HyberOne</string>
+
+    <string name="connected">Internet is Connected</string>
+    <string name="no_internet">No Internet Connection</string>
+    <string name="no_items">No Items Found</string>
+
+    <string name="downloaded">downloaded</string>
+
+</resources>
