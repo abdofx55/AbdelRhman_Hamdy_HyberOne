@@ -1,5 +1,6 @@
 package com.example.abdelrhman_hamdy_hyberone.ui.fragments
 
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -79,7 +80,6 @@ class MainFragment : Fragment() {
             )
 
             adapter = ItemsAdapter(ItemsAdapter.OnClickListener { position, item ->
-                Log.d(LOG_TAG, "${item.name} is clicked and status is : ${item.status}")
                 fakeDownload(position, item)
             })
 
@@ -96,7 +96,7 @@ class MainFragment : Fragment() {
 
     private fun setupObservers() {
 
-        viewModel.resource.observe(this, Observer {
+        viewModel.resource.observe(this, {
             when (it.status) {
                 Status.SUCCESS -> {
                     Log.d(LOG_TAG, Status.SUCCESS.toString())
@@ -121,11 +121,19 @@ class MainFragment : Fragment() {
     }
 
     private fun fakeDownload(position: Int, item: Item) {
-        if (item.status == null && item.downloadPercentage < 100) {
-            Log.d(LOG_TAG, "Not Downloaded")
-            // immediate start download
-            item.status = DownloadStatus.DOWNLOADING
-            adapter.notifyItemChanged(position)
+        if (item.status == null) {
+            // start download
+            val animator = ValueAnimator.ofInt(item.downloadPercentage, 100)
+            animator.duration = (0..30000).random().toLong()
+
+            animator.addUpdateListener { animation ->
+                val percentage = animation.animatedValue as Int
+                item.downloadPercentage = percentage
+                item.status = if (percentage < 100) DownloadStatus.DOWNLOADING else DownloadStatus.DOWNLOADED
+                adapter.notifyItemChanged(position)
+
+            }
+            animator.start()
         }
     }
 }
