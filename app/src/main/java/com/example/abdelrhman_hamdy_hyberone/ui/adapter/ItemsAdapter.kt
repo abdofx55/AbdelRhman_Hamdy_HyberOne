@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.abdelrhman_hamdy_hyberone.R
 import com.example.abdelrhman_hamdy_hyberone.data.models.Item
+import com.example.abdelrhman_hamdy_hyberone.databinding.ListItemBinding
 import com.example.abdelrhman_hamdy_hyberone.utils.DownloadStatus
+import com.example.abdelrhman_hamdy_hyberone.utils.Status
 
 
 class ItemsAdapter(private val onClickListener: OnClickListener) :
@@ -39,60 +41,41 @@ class ItemsAdapter(private val onClickListener: OnClickListener) :
     }
 
     // Holds the views for adding it to image and text
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val name: TextView = itemView.findViewById(R.id.name)
-        private val type: AppCompatImageView = itemView.findViewById(R.id.type)
-        private val status: TextView = itemView.findViewById(R.id.status)
-        private val progressBar: ProgressBar = itemView.findViewById(R.id.progressBar)
-
+    inner class ViewHolder(val binding: ListItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         @SuppressLint("SetTextI18n")
         fun bind(item: Item?) {
             // Name
-            name.text = item?.name
+            binding.name.text = item?.name
 
             // Type
             item?.type.let {
                 if (it.equals("PDF"))
-                    this.type.setImageResource(R.drawable.ic_pdf)
+                    binding.type.setImageResource(R.drawable.ic_pdf)
                 else if (it.equals("VIDEO"))
-                    this.type.setImageResource(R.drawable.ic_video)
+                    binding.type.setImageResource(R.drawable.ic_video)
             }
 
             when (item?.status) {
+
                 DownloadStatus.DOWNLOADING -> {
-                    status.visibility = View.VISIBLE
-                    progressBar.visibility = View.VISIBLE
-                    progressBar.setProgress(item.downloadPercentage)
+                    binding.status.visibility = View.VISIBLE
+                    binding.status.text = "${item.downloadPercentage}%"
 
-                    val animator = ValueAnimator.ofInt(item.downloadPercentage, 100)
-                    animator.setDuration((0..10000).random().toLong())
-
-                    animator.addUpdateListener { animation ->
-                        item.downloadPercentage = animation.animatedValue as Int
-                        status.text = item.downloadPercentage.toString()
-                        progressBar.setProgress(item.downloadPercentage)
-
-                        if (item.downloadPercentage == 100) {
-                            status.visibility = View.VISIBLE
-                            progressBar.visibility = View.GONE
-                            item.status = DownloadStatus.DOWNLOADED
-
-                            status.text = "downloaded"
-                        }
-                    }
-                    animator.start()
-
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.progressBar.setProgress(item.downloadPercentage)
                 }
+
                 DownloadStatus.DOWNLOADED -> {
-                    status.visibility = View.VISIBLE
-                    progressBar.visibility = View.GONE
-
-                    status.text = "downloaded"
+                    binding.status.visibility = View.VISIBLE
+                    binding.progressBar.visibility = View.GONE
+                    binding.status.text = "downloaded"
                 }
+
                 else -> {
-                    status.visibility = View.GONE
-                    progressBar.visibility = View.GONE
+                    binding.status.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
                 }
             }
         }
@@ -101,8 +84,11 @@ class ItemsAdapter(private val onClickListener: OnClickListener) :
     // create new views
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // inflates the list_item layout that is used to hold list item
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
-        return ViewHolder(view)
+//        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
+//        return ViewHolder(view)
+
+        val binding = ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     // binds the list items to a view
